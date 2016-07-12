@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
+        // TODO: Handle the the status changed. Not necesary at the momment.
     }
 
     @Override
@@ -110,6 +110,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     @Override
     public void onClick(View v) {
         switch (v.getId()){
+
+            // handle the fab click. Loading the location if the permission has already been granted or requesting it if needed
             case R.id.fab:
                 boolean locationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
                 if(locationPermission){
@@ -126,25 +128,32 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if(requestCode == PackageManager.PERMISSION_GRANTED){
-            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
 
+            // This means that the permission has been granted to access coarse location
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                loadLocation();
             }
         }
 
     }
 
+
+    // Permission is good, so now we can get the location
     public void loadLocation(){
         Criteria criteria = new Criteria();
         provider = locationManager.getBestProvider(criteria, false);
 
         try {
             Location location = locationManager.getLastKnownLocation(provider);
+            updateData(location);
         } catch (SecurityException e){
             e.printStackTrace();
         }
 
     }
 
+
+    // Update the textview based on the location
     public void updateData(Location location){
         String result = String.format(Locale.US, "Longitude: %5.2f, Lattitude: %5.2f", location.getLongitude(), location.getLatitude());
         data.setText(result);
