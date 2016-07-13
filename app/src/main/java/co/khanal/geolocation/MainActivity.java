@@ -21,14 +21,28 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements LocationListener, ActivityCompat.OnRequestPermissionsResultCallback, View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements LocationListener,
+        ActivityCompat.OnRequestPermissionsResultCallback, View.OnClickListener,
+        OnMapReadyCallback, GoogleMap.OnMapLoadedCallback {
 
     TextView data;
 
     private String provider;
     LocationManager locationManager;
+    Location location;
+
+    GoogleMap map;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         assert (fab != null);
         fab.setOnClickListener(this);
+
+        SupportMapFragment fragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map_frag);
+        fragment.getMapAsync(this);
     }
 
     @Override
@@ -116,6 +133,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 boolean locationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
                 if(locationPermission){
                     loadLocation();
+                    LatLng co = new LatLng(location.getLatitude(), location.getLongitude());
+                    map.addMarker(new MarkerOptions().position(co).title("Current Location"));
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(co, 14));
+
                 } else {
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PackageManager.PERMISSION_GRANTED);
                 }
@@ -144,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         provider = locationManager.getBestProvider(criteria, false);
 
         try {
-            Location location = locationManager.getLastKnownLocation(provider);
+            location = locationManager.getLastKnownLocation(provider);
             updateData(location);
         } catch (SecurityException e){
             e.printStackTrace();
@@ -155,7 +176,37 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     // Update the textview based on the location
     public void updateData(Location location){
+        this.location = location;
         String result = String.format(Locale.US, "Longitude: %5.2f, Lattitude: %5.2f", location.getLongitude(), location.getLatitude());
         data.setText(result);
+
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+
+        if(location == null){
+            double mLat = 36.7598717;
+            double mLong = -76.5907847;
+            LatLng co = new LatLng(mLat, mLong);
+
+            map.addMarker(new MarkerOptions().position(co).title("default location"));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(co, 10));
+        }
+//        else {
+//
+//            Log.d("data", location.toString());
+//
+//            LatLng co = new LatLng(location.getLongitude(), location.getLatitude());
+//            map.addMarker(new MarkerOptions().position(co).title("HOME!"));
+//            map.moveCamera(CameraUpdateFactory.newLatLng(co));
+//        }
+    }
+
+    @Override
+    public void onMapLoaded() {
+        Log.d("map", map.getCameraPosition().toString());
     }
 }

@@ -12,16 +12,19 @@
     tools:context="co.khanal.geolocation.MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <fragment
+        tools:context=".MapsActivity"
+        android:id="@+id/map_frag"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <TextView
         android:id="@+id/data"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello World!" />
 
-    <fragment
-        android:id="@+id/map_frag"
-        android:name="com.google.android.gms.maps.MapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+
 
 </RelativeLayout>
